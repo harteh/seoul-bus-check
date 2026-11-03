@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f7f5ff">
   <link rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
   <title>버스 탈 수 있을까?</title>
 
   <style>
@@ -54,10 +54,65 @@
     }
 
     .subtitle {
-      margin: 10px 0 0;
+      margin: 10px 0 18px;
       color: #89869f;
       font-size: 14px;
       line-height: 1.6;
+    }
+
+    /* 현재 버스 정보 */
+    .bus-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 16px;
+      margin-top: 18px;
+      background: #ffffff;
+      border: 1px solid #eeebf8;
+      border-radius: 16px;
+    }
+
+    .bus-info-text {
+      min-width: 0;
+    }
+
+    .bus-info-label {
+      display: block;
+      margin-bottom: 5px;
+      color: #89859f;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .bus-info-name {
+      color: #393650;
+      font-size: 15px;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .bus-info-number {
+      margin-left: 5px;
+      color: #8575d5;
+    }
+
+    .switch-button {
+      flex-shrink: 0;
+      padding: 9px 11px;
+      border: 1px solid #e5e0f6;
+      border-radius: 11px;
+      background: #f5f2ff;
+      color: #7869b8;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .switch-button:disabled {
+      opacity: 0.5;
+      cursor: wait;
     }
 
     .card {
@@ -157,6 +212,44 @@
       z-index: 1;
       color: #8075ae;
       font-size: 12px;
+    }
+
+    /* 혼잡도 */
+    .congestion {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 16px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.65);
+      color: #7468a8;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .congestion-value {
+      color: #51457f;
+      font-size: 13px;
+    }
+
+    /* 다음 버스 */
+    .next-bus {
+      position: relative;
+      z-index: 1;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(116, 104, 168, 0.18);
+      color: #8075ae;
+      font-size: 12px;
+    }
+
+    .next-bus strong {
+      margin-left: 4px;
+      color: #51457f;
+      font-size: 13px;
     }
 
     .result-card {
@@ -265,6 +358,15 @@
       h1 {
         font-size: 27px;
       }
+
+      .bus-info {
+        padding: 12px;
+      }
+
+      .switch-button {
+        padding: 8px;
+        font-size: 11px;
+      }
     }
   </style>
 </head>
@@ -274,11 +376,28 @@
 
     <header class="top">
       <span class="eyebrow">MY DAILY BUS</span>
+
       <h1>버스 탈 수<br>있을까요?</h1>
+
       <p class="subtitle">
         도착 시간과 걸리는 시간을 비교해<br>
         여유 있게 출발해 보세요.
       </p>
+
+      <!-- 현재 정류소 및 버스 정보 -->
+      <div class="bus-info">
+        <div class="bus-info-text">
+          <span class="bus-info-label">CURRENT BUS</span>
+          <div class="bus-info-name">
+            <span id="stopName">정류소 확인 전</span>
+            <span class="bus-info-number" id="busNumber"></span>
+          </div>
+        </div>
+
+        <button class="switch-button" id="switchBusButton">
+          다른 버스 조회하기
+        </button>
+      </div>
     </header>
 
     <section class="card">
@@ -298,11 +417,10 @@
 
       <button class="main-button" id="checkButton">
         버스 도착 정보 확인하기
-      </button>    
-      
+      </button>
     </section>
 
-
+    <!-- 도착 정보 -->
     <section class="card arrival-card">
       <div class="arrival-heading">
         BUS ARRIVAL · 버스 도착 예정
@@ -315,14 +433,32 @@
       <div class="arrival-caption" id="arrivalCaption">
         확인 버튼을 눌러 실시간 정보를 조회하세요.
       </div>
+
+      <!-- 혼잡도 -->
+      <div class="congestion">
+        혼잡도
+        <span class="congestion-value" id="congestion">
+          확인 전
+        </span>
+      </div>
+
+      <!-- 뒷 차 도착 예정 시간 -->
+      <div class="next-bus">
+        다음 버스 도착 예정
+        <strong id="nextBusTime">--분 후</strong>
+      </div>
     </section>
 
+    <!-- 탑승 가능 여부 -->
     <section class="card result-card">
       <div class="result-label">MY BUS CHECK</div>
+
       <span class="status" id="status">출발 준비</span>
+
       <h2 class="result-message" id="result">
         버스를 탈 수 있을지 확인해 보세요.
       </h2>
+
       <p class="result-detail" id="resultDetail">
         도착 시간과 도보 시간을 비교해 드립니다.
       </p>
@@ -335,116 +471,243 @@
 
   </main>
 
+  <script>
+    const API_URL =
+      "https://seoul-bus-api.harteh31.workers.dev/api/bus";
 
-<script>
-  const API_URL =
-    "https://seoul-bus-api.harteh31.workers.dev/api/bus";
-
-  // 실제 정류소ID·노선ID·정류소순번 정보로 변경하세요.
-  const stId = "105000185";
-  const busRouteId = "100100049";
-  const ord = "21";
-
-  const button = document.getElementById("checkButton");
-  const arrivalDisplay = document.getElementById("arrivalTime");
-  const arrivalCaption = document.getElementById("arrivalCaption");
-  const result = document.getElementById("result");
-  const resultDetail = document.getElementById("resultDetail");
-  const status = document.getElementById("status");
-
-  function showStatus(text, type = "") {
-    status.textContent = text;
-    status.className = "status" + (type ? " " + type : "");
-  }
-
-  async function getBusArrival() {
-    button.disabled = true;
-    button.textContent = "도착 정보 확인 중...";
-    result.textContent = "버스 정보를 확인하고 있습니다.";
-    resultDetail.textContent = "잠시만 기다려 주세요.";
-    showStatus("조회 중");
-
-    try {
-      // Cloudflare 서버에 필요한 값만 전달합니다.
-      const params = new URLSearchParams({
-        stId,
-        busRouteId,
-        ord
-      });
-
-      const response = await fetch(`${API_URL}?${params}`);
-
-      if (!response.ok) {
-        throw new Error("API 요청 실패: " + response.status);
+    // 조회할 버스 정보
+    const buses = [
+      {
+        stId: "105000185",
+        busRouteId: "100100049",
+        ord: "21"
+      },
+      {
+        stId: "107000087",
+        busRouteId: "100100049",
+        ord: "81"
       }
+    ];
 
-      const xmlText = await response.text();
-      const xml = new DOMParser().parseFromString(
-        xmlText,
-        "application/xml"
-      );
+    // 현재 선택된 버스 번호
+    let selectedBusIndex = 0;
 
-      if (xml.querySelector("parsererror")) {
-        throw new Error("XML 응답을 읽을 수 없습니다.");
-      }
+    const button = document.getElementById("checkButton");
+    const switchButton = document.getElementById("switchBusButton");
 
-      // 기존에 확인한 도착 시간 필드
-      const arrivalSeconds = Number(
-        xml.querySelector("kals1")?.textContent
-      );
+    const arrivalDisplay = document.getElementById("arrivalTime");
+    const arrivalCaption = document.getElementById("arrivalCaption");
 
-      if (
-        !Number.isFinite(arrivalSeconds) ||
-        arrivalSeconds < 0
-      ) {
-        throw new Error("유효한 도착시간이 없습니다.");
-      }
+    const stopNameDisplay = document.getElementById("stopName");
+    const busNumberDisplay = document.getElementById("busNumber");
 
-      const arrivalMinutes = Math.ceil(arrivalSeconds / 60);
+    const congestionDisplay = document.getElementById("congestion");
+    const nextBusDisplay = document.getElementById("nextBusTime");
 
-      arrivalDisplay.textContent = arrivalMinutes;
-      arrivalCaption.textContent =
-        "버스 도착까지 약 " + arrivalMinutes + "분 남았습니다.";
+    const result = document.getElementById("result");
+    const resultDetail = document.getElementById("resultDetail");
+    const status = document.getElementById("status");
 
-      const walk = Number(
-        document.getElementById("walkTime").value
-      );
-
-      const spare = arrivalMinutes - walk;
-
-      if (spare >= 3) {
-        showStatus("탑승 여유", "good");
-        result.textContent = "천천히 이동하셔도 괜찮아요.";
-        resultDetail.textContent =
-          "약 " + spare + "분의 여유 시간이 있습니다.";
-      } else if (spare > 0) {
-        showStatus("서둘러 이동", "soon");
-        result.textContent = "조금 서둘러 주세요!";
-        resultDetail.textContent =
-          "여유 시간이 약 " + spare + "분뿐입니다.";
-      } else {
-        showStatus("시간이 촉박해요", "miss");
-        result.textContent = "다음 버스도 확인해 보세요.";
-        resultDetail.textContent =
-          "현재 도보 시간으로는 버스를 놓칠 수 있습니다.";
-      }
-
-    } catch (error) {
-      console.error("버스 도착정보 오류:", error);
-      showStatus("조회 실패", "error");
-      result.textContent = "도착 정보를 가져오지 못했어요.";
-      resultDetail.textContent =
-        "네트워크와 API 응답을 확인해 주세요.";
-      arrivalCaption.textContent =
-        "도착 시간을 확인할 수 없습니다.";
-    } finally {
-      button.disabled = false;
-      button.textContent = "버스 도착 정보 다시 확인";
+    // 상태 표시
+    function showStatus(text, type = "") {
+      status.textContent = text;
+      status.className = "status" + (type ? " " + type : "");
     }
-  }
 
-  button.addEventListener("click", getBusArrival);
-</script>
+    // 초 단위를 분 단위로 변환
+    function secondsToMinutes(value) {
+      if (value === null || value === undefined || value.trim() === "") {
+        return null;
+      }
 
+      const seconds = Number(value);
+
+      if (!Number.isFinite(seconds) || seconds < 0) {
+        return null;
+      }
+
+      return Math.ceil(seconds / 60);
+    }
+
+    // 혼잡도 구분
+    function getCongestion(xml) {
+      const division = xml.querySelector("brerde_Div1")?.textContent?.trim();
+      const value = xml.querySelector("brdrde_Num1")?.textContent?.trim();
+
+      // 혼잡도 데이터 구분값이 4인 경우에만 표시
+      if (division !== "4") {
+        return "데이터 없음";
+      }
+
+      const congestionMap = {
+        "0": "데이터 없음",
+        "3": "여유",
+        "4": "보통",
+        "5": "혼잡"
+      };
+
+      return congestionMap[value] || "데이터 없음";
+    }
+
+    // 버스 도착 정보 조회
+    async function getBusArrival() {
+      button.disabled = true;
+      switchButton.disabled = true;
+
+      button.textContent = "도착 정보 확인 중...";
+
+      result.textContent = "버스 정보를 확인하고 있습니다.";
+      resultDetail.textContent = "잠시만 기다려 주세요.";
+
+      showStatus("조회 중");
+
+      try {
+        const currentBus = buses[selectedBusIndex];
+
+        // Cloudflare 서버에 필요한 값 전달
+        const params = new URLSearchParams({
+          stId: currentBus.stId,
+          busRouteId: currentBus.busRouteId,
+          ord: currentBus.ord
+        });
+
+        const response = await fetch(`${API_URL}?${params}`);
+
+        if (!response.ok) {
+          throw new Error("API 요청 실패: " + response.status);
+        }
+
+        const xmlText = await response.text();
+
+        const xml = new DOMParser().parseFromString(
+          xmlText,
+          "application/xml"
+        );
+
+        if (xml.querySelector("parsererror")) {
+          throw new Error("XML 응답을 읽을 수 없습니다.");
+        }
+
+        // 정류소 이름
+        const stopName =
+          xml.querySelector("stNm")?.textContent?.trim();
+
+        // 버스 번호
+        const busNumber =
+          xml.querySelector("busRouteAbrv")?.textContent?.trim();
+
+        stopNameDisplay.textContent = stopName || "정류소 정보 없음";
+        busNumberDisplay.textContent = busNumber
+          ? ` · ${busNumber}번`
+          : "";
+
+        // 첫 번째 버스 도착 시간
+        const arrivalSeconds =
+          xml.querySelector("kals1")?.textContent?.trim();
+
+        const arrivalMinutes = secondsToMinutes(arrivalSeconds);
+
+        if (arrivalMinutes === null) {
+          throw new Error("유효한 도착시간이 없습니다.");
+        }
+
+        arrivalDisplay.textContent = arrivalMinutes;
+
+        arrivalCaption.textContent =
+          "버스 도착까지 약 " + arrivalMinutes + "분 남았습니다.";
+
+        // 혼잡도
+        congestionDisplay.textContent = getCongestion(xml);
+
+        // 두 번째 버스 도착 시간
+        const nextArrivalSeconds =
+          xml.querySelector("kals2")?.textContent?.trim();
+
+        const nextArrivalMinutes =
+          secondsToMinutes(nextArrivalSeconds);
+
+        nextBusDisplay.textContent =
+          nextArrivalMinutes !== null
+            ? nextArrivalMinutes + "분 후"
+            : "정보 없음";
+
+        // 도보 시간과 도착 시간 비교
+        const walk = Number(
+          document.getElementById("walkTime").value
+        );
+
+        const spare = arrivalMinutes - walk;
+
+        if (spare >= 3) {
+          showStatus("탑승 여유", "good");
+
+          result.textContent = "천천히 이동하셔도 괜찮아요.";
+
+          resultDetail.textContent =
+            "약 " + spare + "분의 여유 시간이 있습니다.";
+
+        } else if (spare > 0) {
+          showStatus("서둘러 이동", "soon");
+
+          result.textContent = "조금 서둘러 주세요!";
+
+          resultDetail.textContent =
+            "여유 시간이 약 " + spare + "분뿐입니다.";
+
+        } else {
+          showStatus("시간이 촉박해요", "miss");
+
+          result.textContent = "다음 버스도 확인해 보세요.";
+
+          resultDetail.textContent =
+            "현재 도보 시간으로는 버스를 놓칠 수 있습니다.";
+        }
+
+      } catch (error) {
+        console.error("버스 도착정보 오류:", error);
+
+        showStatus("조회 실패", "error");
+
+        result.textContent = "도착 정보를 가져오지 못했어요.";
+
+        resultDetail.textContent =
+          "네트워크와 API 응답을 확인해 주세요.";
+
+        arrivalCaption.textContent =
+          "도착 시간을 확인할 수 없습니다.";
+
+        arrivalDisplay.textContent = "--";
+        congestionDisplay.textContent = "정보 없음";
+        nextBusDisplay.textContent = "정보 없음";
+
+      } finally {
+        button.disabled = false;
+        switchButton.disabled = false;
+
+        button.textContent = "버스 도착 정보 다시 확인";
+      }
+    }
+
+    // 다른 버스로 전환
+    switchButton.addEventListener("click", () => {
+      selectedBusIndex = selectedBusIndex === 0 ? 1 : 0;
+
+      // 이전 버스의 정보를 지우고 새 버스 조회
+      stopNameDisplay.textContent = "조회 중...";
+      busNumberDisplay.textContent = "";
+
+      arrivalDisplay.textContent = "--";
+      arrivalCaption.textContent = "새로운 버스 정보를 확인하고 있습니다.";
+
+      congestionDisplay.textContent = "확인 중";
+      nextBusDisplay.textContent = "확인 중";
+
+      getBusArrival();
+    });
+
+    // 도착 정보 확인 버튼
+    button.addEventListener("click", getBusArrival);
+
+  </script>
 </body>
 </html>
