@@ -810,18 +810,9 @@
 
     function getCongestion(xml) {
 
-      const division =
-        xml.querySelector("brerde_Div1")
-          ?.textContent?.trim();
-
       const value =
         xml.querySelector("brdrde_Num1")
           ?.textContent?.trim();
-
-      // 혼잡도 데이터 구분값이 4인 경우에만 표시
-      if (division !== "4") {
-        return "데이터 없음";
-      }
 
       const congestionMap = {
         "0": "데이터 없음",
