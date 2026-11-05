@@ -410,7 +410,15 @@
       text-align: center;
       color: #a19db5;
       font-size: 11px;
-      line-height: 1.8;
+      line-height: 1.7;
+    }
+
+    .last-updated {
+      font-size: 10px;
+      color: #aaa6b8;
+      text-align: right;
+      margin: 5px 0 0;
+      line-height: 1.4;
     }
 
     @media (max-width: 360px) {
@@ -560,7 +568,8 @@
 
     <footer class="footer">
       버스 도착 예정 시간은 실시간 교통 상황에 따라<br>
-      달라질 수 있습니다.
+      달라질 수 있습니다.<br>
+      <p id="lastUpdated" class="last-updated"></p>
     </footer>
 
   </main>
@@ -1089,6 +1098,16 @@
           resultDetail.textContent =
             "현재 도보 시간으로는 버스를 놓칠 수 있습니다.";
         }
+
+        // 마지막 조회 시간 표시
+        const now = new Date();
+
+        document.getElementById("lastUpdated").textContent =
+          `마지막 조회 ${now.toLocaleTimeString("ko-KR", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+          })}`;        
 
       } catch (error) {
 
