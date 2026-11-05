@@ -31,6 +31,12 @@
       background: #f7f5ff;
       color: #33314a;
       font-family: "Pretendard", "Malgun Gothic", sans-serif;
+      transition: background-color 0.5s ease;
+    }
+
+    /* 오후 5시 이후 */
+    body.evening {
+      background-color: #E9EBF0;
     }
 
     .app {
@@ -625,14 +631,25 @@
     // 현재 재생 중인 애니메이션
     let weatherAnimationInstance = null;
 
+    // ==========================================
+    // 시간에 따른 배경색 전환
+    // ==========================================
 
+    function updateTimeTheme() {
+      const hour = new Date().getHours();
+
+      document.body.classList.toggle(
+        "evening",
+        hour >= 17 || hour < 5
+      );
+    }
+    
     // ==========================================
     // 날씨 코드에 따른 애니메이션 선택
     // ==========================================
 
     function getWeatherAnimation(
       weatherCode,
-      isDay,
       apparentTemperature,
       windSpeed
     ) {
@@ -652,18 +669,20 @@
         return weatherAnimations.cold;
       }
 
-      // 4. 기본 날씨 애니메이션
+      // 4. 오후 5시 기준 오전·오후 구분
+      const currentTime = new Date().getHours();
+      const isMorning = currentTime < 17;
 
       // 맑음
       if (weatherCode === 0 || weatherCode === 1) {
-        return isDay
+        return isMorning
           ? weatherAnimations.clearDay
           : weatherAnimations.clearNight;
       }
 
       // 조금 흐림
       if (weatherCode === 2) {
-        return isDay
+        return isMorning
           ? weatherAnimations.partlyCloudyDay
           : weatherAnimations.partlyCloudyNight;
       }
@@ -765,7 +784,6 @@
         const apparentTemperature = current.apparent_temperature;
         const humidity = current.relative_humidity_2m;
         const windSpeed = current.wind_speed_10m;
-        const isDay = current.is_day;
 
         // 현재 기온 표시
         tempDisplay.textContent =
@@ -782,7 +800,6 @@
         // 날씨 및 특이 기상 조건에 맞는 애니메이션 선택
         const animationUrl = getWeatherAnimation(
           weatherCode,
-          isDay,
           apparentTemperature,
           windSpeed
         );
@@ -798,7 +815,11 @@
         humidityDisplay.textContent = "--%";
         windDisplay.textContent = "-- km/h";
       }
+
+      updateTimeTheme();
+    
     }
+
 
 
     // ==========================================
